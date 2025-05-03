@@ -53,18 +53,13 @@ where
                 }
             }
         }
-        let (x1, y1) = (x_lo, y_lo);
-        let (x2, y2) = (x_lo + FB_HEIGHT as i16, y_lo + FB_WIDTH as i16);
-        let (nx1, ny1) = (y1, WIDTH as i16 - x1);
-        let (nx2, ny2) = (y2, WIDTH as i16 - x2);
-        let (x_lo_rot, x_hi_rot) = (nx1.min(nx2), nx1.max(nx2));
-        let (y_lo_rot, y_hi_rot) = (ny1.min(ny2), ny1.max(ny2));
+
         display.draw_image(
             &rotated,
-            x_lo_rot,
-            y_lo_rot,
-            x_lo_rot + FB_HEIGHT as i16,
-            y_lo_rot + FB_WIDTH as i16,
+            y_lo,
+            (200 - x_lo) - FB_WIDTH as i16,
+            y_lo + FB_HEIGHT as i16,
+            ((200 - x_lo) - FB_WIDTH as i16) + FB_HEIGHT as i16,
         )
     }
 }
