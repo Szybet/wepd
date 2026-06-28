@@ -62,6 +62,37 @@ where
             ((200 - x_lo) - FB_WIDTH as i16) + FB_HEIGHT as i16,
         )
     }
+
+    pub fn write_ram<C: IsDisplayConfiguration>(
+        &mut self,
+        display: &mut Display<C>,
+        x_lo: i16,
+        y_lo: i16,
+    ) -> Result<(), Error<C>> {
+        let mut rotated: [u8; FB_WIDTH * FB_HEIGHT / 8] = [0; FB_WIDTH * FB_HEIGHT / 8];
+        for y in 0..FB_HEIGHT {
+            for x in 0..FB_WIDTH {
+                let src_idx = (y * FB_WIDTH + x) / 8;
+                let bit_val = (self.framebuffer[src_idx] >> (7 - (x % 8))) & 1;
+                if bit_val == 1 {
+                    // 90° CCW: (x,y) → (new_x, new_y) = (y, FB_WIDTH−1−x)
+                    let new_x = y;
+                    let new_y = FB_WIDTH - 1 - x;
+                    let dst_idx = (new_y * FB_HEIGHT + new_x) / 8;
+                    let dst_bit = 7 - (new_x % 8);
+                    rotated[dst_idx] |= 1 << dst_bit;
+                }
+            }
+        }
+
+        display.write_image(
+            &rotated,
+            y_lo,
+            (200 - x_lo) - FB_WIDTH as i16,
+            y_lo + FB_HEIGHT as i16,
+            ((200 - x_lo) - FB_WIDTH as i16) + FB_HEIGHT as i16,
+        )
+    }
 }
 
 impl<const FB_WIDTH: usize, const FB_HEIGHT: usize> Dimensions

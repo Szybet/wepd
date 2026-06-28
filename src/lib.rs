@@ -16,12 +16,12 @@ mod embedded_graphics270;
 mod embedded_graphics90;
 #[cfg(all(feature = "embedded-graphics", feature = "rotate0"))]
 mod embedded_graphics0;
-mod geometry;
+pub mod geometry;
 mod private {
     pub trait Internal {}
 }
 
-use geometry::*;
+pub use geometry::*;
 use private::*;
 
 #[cfg(all(feature = "embedded-graphics", feature = "rotate270"))]
@@ -457,6 +457,60 @@ impl<C: IsDisplayConfiguration> Display<C> {
         self.config.spi.write(&[0xfc])?;
         self.transfer_command(0x20)?;
         self.wait_while_busy()?;
+
+        Ok(())
+    }
+
+    pub fn refresh_non_blocking(&mut self, rect: Rect) -> Result<(), Error<C>> {
+        if self.initial_refresh {
+            return self.refresh_all_non_blocking(false);
+        }
+        let rect = rect.intersection(SCREEN_RECT);
+        let Some(rect) = rect else {
+            return Ok(());
+        };
+        let rect = Rect {
+            x: Span {
+                lo: floor_multiple(rect.x.lo, 8),
+                hi: ceil_multiple(rect.x.hi, 8),
+            },
+            y: rect.y,
+        };
+        if !self.initialized {
+            self.init()?;
+        }
+        self.set_partial_ram_area(rect)?;
+        self.update_part_non_blocking()?;
+
+        Ok(())
+    }
+
+    fn refresh_all_non_blocking(&mut self, partial_update_mode: bool) -> Result<(), Error<C>> {
+        if partial_update_mode {
+            self.refresh_non_blocking(SCREEN_RECT)?;
+        } else {
+            self.update_full_non_blocking()?;
+        }
+
+        Ok(())
+    }
+
+    fn update_full_non_blocking(&mut self) -> Result<(), Error<C>> {
+        self.initial_refresh = false;
+
+        self.transfer_command(0x22)?;
+        self.config.spi.write(&[0xf4])?;
+        self.transfer_command(0x20)?;
+        self.config.delay.delay_ms(1);
+
+        Ok(())
+    }
+
+    fn update_part_non_blocking(&mut self) -> Result<(), Error<C>> {
+        self.transfer_command(0x22)?;
+        self.config.spi.write(&[0xfc])?;
+        self.transfer_command(0x20)?;
+        self.config.delay.delay_ms(1);
 
         Ok(())
     }

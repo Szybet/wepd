@@ -1,7 +1,7 @@
 #[derive(Clone, Copy, Debug)]
-pub(crate) struct Span {
-    pub(crate) lo: i16,
-    pub(crate) hi: i16,
+pub struct Span {
+    pub lo: i16,
+    pub hi: i16,
 }
 
 impl Span {
@@ -25,9 +25,9 @@ impl Span {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub(crate) struct Rect {
-    pub(crate) x: Span,
-    pub(crate) y: Span,
+pub struct Rect {
+    pub x: Span,
+    pub y: Span,
 }
 
 impl Rect {

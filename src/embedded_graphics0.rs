@@ -54,6 +54,21 @@ where
             y_lo + FB_HEIGHT as i16,
         )
     }    
+
+    pub fn write_ram<C: IsDisplayConfiguration>(
+        &mut self,
+        display: &mut Display<C>,
+        x_lo: i16,
+        y_lo: i16,
+    ) -> Result<(), Error<C>> {
+        display.write_image(
+            &self.framebuffer,
+            x_lo,
+            y_lo,
+            x_lo + FB_WIDTH as i16,
+            y_lo + FB_HEIGHT as i16,
+        )
+    }
 }
 
 impl<const FB_WIDTH: usize, const FB_HEIGHT: usize> Dimensions
