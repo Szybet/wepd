@@ -10,8 +10,12 @@ use embedded_hal::{
     spi::{self, SpiDevice},
 };
 
-#[cfg(feature = "embedded-graphics")]
-mod embedded_graphics;
+#[cfg(all(feature = "embedded-graphics", feature = "rotate270"))]
+mod embedded_graphics270;
+#[cfg(all(feature = "embedded-graphics", feature = "rotate90"))]
+mod embedded_graphics90;
+#[cfg(all(feature = "embedded-graphics", feature = "rotate0"))]
+mod embedded_graphics0;
 mod geometry;
 mod private {
     pub trait Internal {}
@@ -19,8 +23,13 @@ mod private {
 
 use geometry::*;
 use private::*;
-#[cfg(feature = "embedded-graphics")]
-pub use embedded_graphics::*;
+
+#[cfg(all(feature = "embedded-graphics", feature = "rotate270"))]
+pub use embedded_graphics270::*;
+#[cfg(all(feature = "embedded-graphics", feature = "rotate90"))]
+pub use embedded_graphics90::*;
+#[cfg(all(feature = "embedded-graphics", feature = "rotate0"))]
+pub use embedded_graphics0::*;
 
 const WIDTH: usize = 200;
 const HEIGHT: usize = 200;
